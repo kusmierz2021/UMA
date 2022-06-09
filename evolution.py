@@ -4,7 +4,11 @@ import pandas as pd
 from tqdm import tqdm
 import pickle
 
+
+
 class Evolution:
+    BEST_TREE = None
+    BEST_RATE = None
 
     def cross(tree1, tree2):
         level = randint(1, 3)
@@ -29,47 +33,104 @@ class Evolution:
 
 
     def mutation(tree, data_dict):
-        level = randint(0, 6)
-        to_do = "tree"
+        for mut in range(5):
+            level = randint(0, 6)
+            to_do = "tree"
 
-        for lev in range(0, level, 2):
-            side_num = randint(0, 1)
-            side = "right" if side_num == 0 else "left"
-            to_do = to_do + "." + side
+            for lev in range(0, level, 2):
+                side_num = randint(0, 1)
+                side = "right" if side_num == 0 else "left"
+                to_do = to_do + "." + side
 
-        new_rule, new_value = Node.get_random_rule(data_dict)
-        to_do_rule = to_do + ".rule = new_rule"
-        to_do_value = to_do + ".value = new_value"
+            new_rule, new_value = Node.get_random_rule(data_dict)
+            to_do_rule = to_do + ".rule = new_rule"
+            to_do_value = to_do + ".value = new_value"
 
-        exec(to_do_rule)
-        exec(to_do_value)
+            exec(to_do_rule)
+            exec(to_do_value)
         return tree
 
+    @staticmethod
     def fitness(tree, train_df):
         correct = 0
         incorrect = 0
-        for i in tqdm(range(train_df.shape[0])):
+        # for i in tqdm(range(train_df.shape[0])):
+        # for i in tqdm(range(1000)):
+        for i in range(1000):
             if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['satisfaction']:
                 correct = correct + 1
             else:
                 incorrect = incorrect + 1
         grade = correct / (incorrect + correct)
-        print(grade)
         return grade
+
+    def tournaments(population_rates, size=3):
+        new_population = []
+        while True:
+            tournament = []
+            for i in range(size):
+                x = randint(0, len(population_rates)-1)
+                tournament.append(population_rates[x])
+            best_rate = -1
+            for i in range(len(tournament)):
+                if tournament[i][1] > best_rate:
+                    best_rate = tournament[i][1]
+                    best_tree = tournament[i][0]
+            new_population.append(best_tree)
+            if len(new_population) == (len(population_rates)-1):
+                new_population.append(Evolution.BEST_TREE)
+                return new_population
+
+    @staticmethod
+    def crossing(population):
+        population_after_crossing = []
+        for i in range(10):
+            t1 = randint(0, len(population)-1)
+            tree1 = population.pop(t1)
+            t2 = randint(0, len(population) - 1)
+            tree2 = population.pop(t2)
+            tree1, tree2 = Evolution.cross(tree1, tree2)
+            population_after_crossing.append(tree1)
+            population_after_crossing.append(tree2)
+
+        return population_after_crossing
+
+    @staticmethod
+    def train(iterations, population, train_df, result_dict):
+        if Evolution.BEST_TREE is None:
+            Evolution.BEST_TREE = population[0]
+            Evolution.BEST_RATE = Evolution.fitness(Evolution.BEST_TREE, train_df)
+        for i in range(iterations):
+            rates_list = []
+            for i in range(len(population)):
+                rate = Evolution.fitness(population[i], train_df)
+                if rate > Evolution.BEST_RATE:
+                    Evolution.BEST_RATE = rate
+                    Evolution.BEST_TREE = population[i]
+                rates_list.append(rate)
+            population_rates = list(zip(population, rates_list))
+
+            next_gen_population = Evolution.tournaments(population_rates)
+            population = Evolution.crossing([Evolution.mutation(x, result_dict) for x in next_gen_population])
+            print(Evolution.BEST_RATE)
+        return population, Evolution.BEST_TREE
+
+
 
 if __name__ == "__main__":
 
-    # train_df = pd.read_csv("stroke-prediction-dataset.csv")
-    # train_df = train_df.drop("id", axis=1)
-    # # train_df.drop("Unnamed: 0", inplace=True, axis=1)
-    #
-    # result_dict, classes = Node.create_dictionary_from_df(train_df)
-    #
-    #
-    # population = Node.get_init_population(20, result_dict, classes)
-    # pickle.dump(population, open("population-stroke.sav", 'wb'))
+    train_df = pd.read_csv("airline-passenger-satisfaction/test.csv")
+    train_df.drop("Unnamed: 0", inplace=True, axis=1)
+    result_dict, classes = Node.create_dictionary_from_df(train_df)
 
-    population = pickle.load(open("population-stroke.sav", 'rb'))
-    # population[0].print_tree()
-    population[0].print_tree()
-    # Evolution.fitness(population[0], train_df)
+    # # population = Node.get_init_population(20, result_dict, classes)
+    # # pickle.dump(population, open("population.sav", 'wb'))
+
+    population = pickle.load(open("population.sav", 'rb'))
+
+
+    population, best_tree = Evolution.train(100, population, train_df, result_dict)
+
+
+    pickle.dump(population, open("last_population.sav", 'wb'))
+    pickle.dump(best_tree, open("best_tree.sav", 'wb'))

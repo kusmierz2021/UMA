@@ -59,15 +59,17 @@ class Evolution:
 
 if __name__ == "__main__":
 
-    train_df = pd.read_csv("airline-passenger-satisfaction/test.csv")
-    train_df.drop("Unnamed: 0", inplace=True, axis=1)
-    result_dict, classes = Node.create_dictionary_from_df(train_df)
-
-
+    # train_df = pd.read_csv("stroke-prediction-dataset.csv")
+    # train_df = train_df.drop("id", axis=1)
+    # # train_df.drop("Unnamed: 0", inplace=True, axis=1)
+    #
+    # result_dict, classes = Node.create_dictionary_from_df(train_df)
+    #
+    #
     # population = Node.get_init_population(20, result_dict, classes)
-    # pickle.dump(population, open("population.sav", 'wb'))
+    # pickle.dump(population, open("population-stroke.sav", 'wb'))
 
-    population = pickle.load(open("population.sav", 'rb'))
+    population = pickle.load(open("population-stroke.sav", 'rb'))
     # population[0].print_tree()
     population[0].print_tree()
     # Evolution.fitness(population[0], train_df)

@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 from collections import Counter
-from random import randint
+import random as r
+# from random import randint
 
-
+r.seed(305858)
 
 class Node:
     """
@@ -17,7 +18,7 @@ class Node:
 
         # probability of being leaf
 
-        # x = randint(0, 10)
+        # x = r.randint(0, 10)
         # if ((x <= 2 or self.depth == max_depth) and self.depth != 0):
         if self.depth == max_depth:
             self.value = Node.get_random_class(classes)
@@ -43,17 +44,17 @@ class Node:
 
     @staticmethod
     def get_random_rule(data_dict):
-        x = randint(0, len(list(data_dict.keys())) - 1)
+        x = r.randint(0, len(list(data_dict.keys())) - 1)
         key = list(data_dict.keys())[x]
         rule = key
-        x = randint(0, len(data_dict[key]) - 1)
+        x = r.randint(0, len(data_dict[key]) - 1)
         value = data_dict[key][x]
         return rule, value
 
     # def get_rule(self, data_dict, classes, probability=30):
-    #     x = randint(1, 100)
+    #     x = r.randint(1, 100)
     #     if ((x <= 2 or self.depth == max_depth) and self.depth != 0):
-    #         x = randint(0, len(classes) - 1)
+    #         x = r.randint(0, len(classes) - 1)
     #         self.value = classes[x]
     #         self.rule = "leaf"
     #         self.left = None

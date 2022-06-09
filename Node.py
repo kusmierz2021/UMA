@@ -3,36 +3,23 @@ import numpy as np
 from collections import Counter
 from random import randint
 
-def create_dictionary_from_csv(path):
-    result_dict = {}
-    train_df = pd.read_csv(path)
-    rules_list = train_df.columns.tolist()
-    rules_list = rules_list[1:]
-    for rule in rules_list:
-        x = train_df[rule].tolist()
-
-        for i in range(len(x)):
-            if str(x[i]) == "nan":
-                x[i] = 0
-        x = list(dict.fromkeys(x))
-        x.sort()
-        result_dict[rule] = x
-    classes = result_dict[list(result_dict.keys())[-1]]
-    result_dict.pop(list(result_dict.keys())[-1])
-    return result_dict, classes
 
 
 class Node:
     """
     Class for creating nodes for a decision tree
     """
+    CLASS_NUMBER = 0
 
-    def __init__(self, data_dict, classes, depth=None, max_depth=5):
+
+    def __init__(self, data_dict, classes, depth=None, max_depth=4):
         self.depth = depth if depth else 0
 
         # probability of being leaf
-        x = randint(0, 10)
-        if ((x <= 2 or self.depth == max_depth) and self.depth != 0):
+
+        # x = randint(0, 10)
+        # if ((x <= 2 or self.depth == max_depth) and self.depth != 0):
+        if self.depth == max_depth:
             self.value = Node.get_random_class(classes)
             self.rule = "leaf"
             self.left = None
@@ -50,7 +37,8 @@ class Node:
 
     @staticmethod
     def get_random_class(classes):
-        x = randint(0, len(classes) - 1)
+        x = Node.CLASS_NUMBER % len(classes)
+        Node.CLASS_NUMBER = Node.CLASS_NUMBER + 1
         return classes[x]
 
     @staticmethod
@@ -101,10 +89,10 @@ class Node:
             self.right.print_tree()
 
     def predict(self, row_dict):
-        print_in = self.depth * 4 * "-" + self.rule + " <= " + str(self.value) + '\n'
-        print(print_in)
+        # print_in = self.depth * 4 * "-" + self.rule + " <= " + str(self.value) + '\n'
+        # print(print_in)
         if self.rule == "leaf":
-            print(f"predicted value = {self.value}")
+            # print(f"predicted value = {self.value}")
             return self.value
         to_check = row_dict[self.rule]
         if to_check <= self.value:
@@ -113,35 +101,31 @@ class Node:
             return self.right.predict(row_dict)
 
     @staticmethod
-    def get_init_population(size):
+    def get_init_population(size, result_dict, classes):
         initial_population = []
         for i in range(size):
             initial_population.append(Node(result_dict, classes))
         return initial_population
 
+    @staticmethod
+    def create_dictionary_from_df(train_df):
+        result_dict = {}
+        rules_list = train_df.columns.tolist()
 
+        print(rules_list)
+        for rule in rules_list:
+            x = train_df[rule].tolist()
+
+            for i in range(len(x)):
+                if str(x[i]) == "nan":
+                    x[i] = 0
+            x = list(dict.fromkeys(x))
+            x.sort()
+            result_dict[rule] = x
+        classes = result_dict[list(result_dict.keys())[-1]]
+        result_dict.pop(list(result_dict.keys())[-1])
+        return result_dict, classes
 
 
 if __name__ == "__main__":
-    result_dict, classes = create_dictionary_from_csv("airline-passenger-satisfaction/train.csv")
-    #     tree_1 = Node(result_dict, classes)
-    #     tree_2 = Node(result_dict, classes)
-    #     tree_3 = Node(result_dict, classes)
-    #     tree_4 = Node(result_dict, classes)
-    #     tree_5 = Node(result_dict, classes)
-    #     tree_6 = Node(result_dict, classes)
-    #     tree_7 = Node(result_dict, classes)
-    #     tree_8 = Node(result_dict, classes)
-    #     tree_9 = Node(result_dict, classes)
-    #     tree_10 = Node(result_dict, classes)
-    #     initial_population = [tree_1, tree_2, tree_3, tree_4, tree_5, tree_6, tree_7, tree_8, tree_9, tree_10]
-    initial_population = Node.get_init_population(10)
-
-    train_df = pd.read_csv("airline-passenger-satisfaction/train.csv")
-    train_df.drop("Unnamed: 0", inplace=True, axis=1)
-
-    initial_population[0].predict(train_df.iloc[1])
-
-    print(train_df.iloc[1])
-    train_df.iloc[1]['satisfaction']
-    initial_population[0].print_tree()
+    pass

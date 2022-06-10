@@ -56,8 +56,8 @@ class Evolution:
         incorrect = 0
         # for i in tqdm(range(train_df.shape[0])):
         # for i in tqdm(range(1000)):
-        for i in range(1000):
-            if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['satisfaction']:
+        for i in range(3000, 5110):
+            if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['stroke']:
                 correct = correct + 1
             else:
                 incorrect = incorrect + 1
@@ -107,11 +107,13 @@ class Evolution:
                 if rate > Evolution.BEST_RATE:
                     Evolution.BEST_RATE = rate
                     Evolution.BEST_TREE = population[i]
+                    pickle.dump(Evolution.BEST_TREE, open("evolution-stroke.best.tree.sav", 'wb'))
                 rates_list.append(rate)
             population_rates = list(zip(population, rates_list))
 
             next_gen_population = Evolution.tournaments(population_rates)
-            population = Evolution.crossing([Evolution.mutation(x, result_dict) for x in next_gen_population])
+            # population = Evolution.crossing(next_gen_population)
+            population = [Evolution.mutation(x, result_dict) for x in population]
             print(Evolution.BEST_RATE)
         return population, Evolution.BEST_TREE
 
@@ -119,19 +121,19 @@ class Evolution:
 
 if __name__ == "__main__":
 
-    train_df = pd.read_csv("airline-passenger-satisfaction/test.csv")
-    train_df.drop("Unnamed: 0", inplace=True, axis=1)
+    train_df = pd.read_csv("stroke-prediction-dataset.csv")
+    # train_df.drop("Unnamed: 0", inplace=True, axis=1)
     train_df = train_df.drop("id", axis=1)
     result_dict, classes = Node.create_dictionary_from_df(train_df)
 
     # # population = Node.get_init_population(20, result_dict, classes)
     # # pickle.dump(population, open("population.sav", 'wb'))
 
-    population = pickle.load(open("population.sav", 'rb'))
+    population = pickle.load(open("population-stroke.sav", 'rb'))
 
 
     population, best_tree = Evolution.train(100, population, train_df, result_dict)
 
 
-    pickle.dump(population, open("last_population.sav", 'wb'))
-    pickle.dump(best_tree, open("best_tree.sav", 'wb'))
+    pickle.dump(population, open("last_population-stroke.sav", 'wb'))
+    pickle.dump(best_tree, open("best_tree-stroke.sav", 'wb'))

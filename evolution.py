@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # population = Node.get_init_population(20, result_dict, classes)
     # pickle.dump(population, open("population-stroke.sav", 'wb'))
 
-    population = pickle.load(open("population-stroke.sav", 'rb'))
+    population = pickle.load(open("population.sav", 'rb'))
     # population[0].print_tree()
     population[0].print_tree()
     # Evolution.fitness(population[0], train_df)

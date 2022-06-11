@@ -61,7 +61,7 @@ class Evolution:
         # for i in tqdm(range(train_df.shape[0])):
         # for i in tqdm(range(0, len(train_df))):
         for i in range(0, len(train_df)):
-            if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['satisfaction']:
+            if tree.predict(train_df.iloc[i]) == train_df.iloc[i][-1]:
                 correct = correct + 1
             else:
                 incorrect = incorrect + 1

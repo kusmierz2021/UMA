@@ -119,7 +119,7 @@ class Evolution:
             population = Evolution.crossing(population)
             population = [Evolution.mutation(x, result_dict) for x in population]
             print(Evolution.BEST_RATE)
-        return population, Evolution.BEST_TREE
+        return population
 
 
 

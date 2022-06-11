@@ -6,9 +6,6 @@ import pandas as pd
 from tqdm import tqdm
 import pickle
 
-from sklearn.model_selection import train_test_split
-
-
 
 class Evolution:
     BEST_TREE = None
@@ -55,11 +52,25 @@ class Evolution:
         return tree
 
     @staticmethod
+    def fitness_for_conf_mtx(tree, train_df):
+        correct = 0
+        incorrect = 0
+        predicted = []
+        proper = []
+        for i in tqdm(range(0, len(train_df))):
+            predicted.append(tree.predict(train_df.iloc[i]))
+            proper.append(train_df.iloc[i]['satisfaction'])
+            if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['satisfaction']:
+                correct = correct + 1
+            else:
+                incorrect = incorrect + 1
+        grade = correct / (incorrect + correct)
+        return proper, predicted
+
+    @staticmethod
     def fitness(tree, train_df):
         correct = 0
         incorrect = 0
-        # for i in tqdm(range(train_df.shape[0])):
-        # for i in tqdm(range(0, len(train_df))):
         for i in range(0, len(train_df)):
             if tree.predict(train_df.iloc[i]) == train_df.iloc[i][-1]:
                 correct = correct + 1
@@ -104,7 +115,6 @@ class Evolution:
         if Evolution.BEST_TREE is None:
             Evolution.BEST_TREE = population[0]
             Evolution.BEST_RATE = Evolution.fitness(Evolution.BEST_TREE, train_df)
-        # for i in range(iterations):
         for i in tqdm(range(iterations)):
             rates_list = []
             for i in range(len(population)):
@@ -116,24 +126,32 @@ class Evolution:
                 rates_list.append(rate)
             population_rates = list(zip(population, rates_list))
 
-            # population = Evolution.tournaments(population_rates)
-            # population = Evolution.crossing(population)
-            population = [Evolution.mutation(x, result_dict) for x in population]
-            print(Evolution.BEST_RATE)
-        return population
+            ## IMPORTANT PART FOR EXPERIMENTS ##
+            ## include or exclude different processes by commenting desired line
 
+            population = Evolution.tournaments(population_rates)
+            population = Evolution.crossing(population)
+            population = [Evolution.mutation(x, result_dict) for x in population]
+
+            ## END OF EXPERIMENT POSSIBILITIES ##
+
+            ## show actual best classificator via console
+            print(Evolution.BEST_RATE)
+
+        return population
 
 
 if __name__ == "__main__":
 
     df = pd.read_csv("airline-passenger-satisfaction/train.csv")
-    # # line for deleting unnecessary columns ? if needed
+    ## two lines for deleting unnecessary columns if needed
     df.drop("Unnamed: 0", inplace=True, axis=1)
     df = df.drop("id", axis=1)
+    ##
 
     result_dict, classes = Node.create_dictionary_from_df(df)
 
-    # # init of population if yet not exist
+    ## init of population if yet not exist
         # population = Node.get_init_population(20, result_dict, classes)
         # pickle.dump(population, open("population.sav", 'wb'))
 
@@ -142,12 +160,11 @@ if __name__ == "__main__":
     train_df.drop("Unnamed: 0", inplace=True, axis=1)
     train_df = train_df.drop("id", axis=1)
 
-    # # division dataset for test and training subsets
+    ## division dataset for test and training subsets
         # train_df, test_df = train_test_split(df, test_size=0.2)
         # train_df.to_csv('train.csv', index=False)
         # test_df.to_csv('test.csv', index=False)
 
     population = Evolution.train(20, population, train_df, result_dict)
 
-    # pickle.dump(population, open("last_population-wine.sav", 'wb'))
 

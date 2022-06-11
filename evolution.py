@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     result_dict, classes = Node.create_dictionary_from_df(df)
 
-    ## init of population if yet not exist
+    ## init population if yet not exist
         # population = Node.get_init_population(20, result_dict, classes)
         # pickle.dump(population, open("population.sav", 'wb'))
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     train_df.drop("Unnamed: 0", inplace=True, axis=1)
     train_df = train_df.drop("id", axis=1)
 
-    ## division dataset for test and training subsets
+    ## division dataset for test and training subsets if yet not exist
         # train_df, test_df = train_test_split(df, test_size=0.2)
         # train_df.to_csv('train.csv', index=False)
         # test_df.to_csv('test.csv', index=False)

@@ -155,7 +155,7 @@ if __name__ == "__main__":
         # population = Node.get_init_population(20, result_dict, classes)
         # pickle.dump(population, open("population.sav", 'wb'))
 
-    population = pickle.load(open("population.sav", 'rb'))
+    population = pickle.load(open("populations/population.sav", 'rb'))
     train_df = pd.read_csv("airline-passenger-satisfaction/train.csv")
     train_df.drop("Unnamed: 0", inplace=True, axis=1)
     train_df = train_df.drop("id", axis=1)

@@ -1,8 +1,12 @@
+__author__ = "Rafał Kuśmierz, Michał Podolec"
+
 from Node import *
 from random import randint
 import pandas as pd
 from tqdm import tqdm
 import pickle
+
+from sklearn.model_selection import train_test_split
 
 
 
@@ -55,9 +59,9 @@ class Evolution:
         correct = 0
         incorrect = 0
         # for i in tqdm(range(train_df.shape[0])):
-        # for i in tqdm(range(1000)):
-        for i in range(3000, 5110):
-            if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['stroke']:
+        for i in tqdm(range(0, len(train_df))):
+        # for i in range(1000, 3000):
+            if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['Drug']:
                 correct = correct + 1
             else:
                 incorrect = incorrect + 1
@@ -107,12 +111,12 @@ class Evolution:
                 if rate > Evolution.BEST_RATE:
                     Evolution.BEST_RATE = rate
                     Evolution.BEST_TREE = population[i]
-                    pickle.dump(Evolution.BEST_TREE, open("evolution-stroke.best.tree.sav", 'wb'))
+                    pickle.dump(Evolution.BEST_TREE, open("evolution-drugs-random.best.tree.sav", 'wb'))
                 rates_list.append(rate)
             population_rates = list(zip(population, rates_list))
 
-            next_gen_population = Evolution.tournaments(population_rates)
-            # population = Evolution.crossing(next_gen_population)
+            population = Evolution.tournaments(population_rates)
+            population = Evolution.crossing(population)
             population = [Evolution.mutation(x, result_dict) for x in population]
             print(Evolution.BEST_RATE)
         return population, Evolution.BEST_TREE
@@ -121,19 +125,26 @@ class Evolution:
 
 if __name__ == "__main__":
 
-    train_df = pd.read_csv("stroke-prediction-dataset.csv")
-    # train_df.drop("Unnamed: 0", inplace=True, axis=1)
-    train_df = train_df.drop("id", axis=1)
-    result_dict, classes = Node.create_dictionary_from_df(train_df)
+    df = pd.read_csv("DrugsABCXY/train.csv")
+    # # line for deleting unnecessary columns ? if needed
+        # train_df.drop("Unnamed: 0", inplace=True, axis=1)
+        # train_df = train_df.drop("id", axis=1)
 
-    # # population = Node.get_init_population(20, result_dict, classes)
-    # # pickle.dump(population, open("population.sav", 'wb'))
+    result_dict, classes = Node.create_dictionary_from_df(df)
 
-    population = pickle.load(open("population-stroke.sav", 'rb'))
+    # # init of population if yet not exist
+        # population = Node.get_init_population(20, result_dict, classes)
+        # pickle.dump(population, open("population.sav", 'wb'))
 
+    population = pickle.load(open("population-drugs.sav", 'rb'))
+    train_df = pd.read_csv("DrugsABCXY/train.csv")
 
-    population, best_tree = Evolution.train(100, population, train_df, result_dict)
+    # # division dataset for test and training subsets
+        # train_df, test_df = train_test_split(df, test_size=0.2)
+        # train_df.to_csv('train.csv', index=False)
+        # test_df.to_csv('test.csv', index=False)
 
+    population = Evolution.train(1, population, train_df, result_dict)
 
-    pickle.dump(population, open("last_population-stroke.sav", 'wb'))
-    pickle.dump(best_tree, open("best_tree-stroke.sav", 'wb'))
+    # pickle.dump(population, open("last_population-wine.sav", 'wb'))
+

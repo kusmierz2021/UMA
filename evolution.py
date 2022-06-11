@@ -59,9 +59,9 @@ class Evolution:
         correct = 0
         incorrect = 0
         # for i in tqdm(range(train_df.shape[0])):
-        for i in tqdm(range(0, len(train_df))):
-        # for i in range(1000, 3000):
-            if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['Drug']:
+        # for i in tqdm(range(0, len(train_df))):
+        for i in range(0, len(train_df)):
+            if tree.predict(train_df.iloc[i]) == train_df.iloc[i]['satisfaction']:
                 correct = correct + 1
             else:
                 incorrect = incorrect + 1
@@ -104,31 +104,32 @@ class Evolution:
         if Evolution.BEST_TREE is None:
             Evolution.BEST_TREE = population[0]
             Evolution.BEST_RATE = Evolution.fitness(Evolution.BEST_TREE, train_df)
-        for i in range(iterations):
+        # for i in range(iterations):
+        for i in tqdm(range(iterations)):
             rates_list = []
             for i in range(len(population)):
                 rate = Evolution.fitness(population[i], train_df)
                 if rate > Evolution.BEST_RATE:
                     Evolution.BEST_RATE = rate
                     Evolution.BEST_TREE = population[i]
-                    pickle.dump(Evolution.BEST_TREE, open("evolution-drugs-random.best.tree.sav", 'wb'))
+                    pickle.dump(Evolution.BEST_TREE, open("evolution-satisfaction-20-no-crossing.best.tree.sav", 'wb'))
                 rates_list.append(rate)
             population_rates = list(zip(population, rates_list))
 
-            population = Evolution.tournaments(population_rates)
-            population = Evolution.crossing(population)
+            # population = Evolution.tournaments(population_rates)
+            # population = Evolution.crossing(population)
             population = [Evolution.mutation(x, result_dict) for x in population]
             print(Evolution.BEST_RATE)
-        return population, Evolution.BEST_TREE
+        return population
 
 
 
 if __name__ == "__main__":
 
-    df = pd.read_csv("DrugsABCXY/train.csv")
+    df = pd.read_csv("airline-passenger-satisfaction/train.csv")
     # # line for deleting unnecessary columns ? if needed
-        # train_df.drop("Unnamed: 0", inplace=True, axis=1)
-        # train_df = train_df.drop("id", axis=1)
+    df.drop("Unnamed: 0", inplace=True, axis=1)
+    df = df.drop("id", axis=1)
 
     result_dict, classes = Node.create_dictionary_from_df(df)
 
@@ -136,15 +137,17 @@ if __name__ == "__main__":
         # population = Node.get_init_population(20, result_dict, classes)
         # pickle.dump(population, open("population.sav", 'wb'))
 
-    population = pickle.load(open("population-drugs.sav", 'rb'))
-    train_df = pd.read_csv("DrugsABCXY/train.csv")
+    population = pickle.load(open("population.sav", 'rb'))
+    train_df = pd.read_csv("airline-passenger-satisfaction/train.csv")
+    train_df.drop("Unnamed: 0", inplace=True, axis=1)
+    train_df = train_df.drop("id", axis=1)
 
     # # division dataset for test and training subsets
         # train_df, test_df = train_test_split(df, test_size=0.2)
         # train_df.to_csv('train.csv', index=False)
         # test_df.to_csv('test.csv', index=False)
 
-    population = Evolution.train(1, population, train_df, result_dict)
+    population = Evolution.train(20, population, train_df, result_dict)
 
     # pickle.dump(population, open("last_population-wine.sav", 'wb'))
 

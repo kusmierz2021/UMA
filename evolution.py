@@ -103,8 +103,8 @@ class Evolution:
         """
         correct = 0
         incorrect = 0
-        for i in range(1000):
-        # for i in range(0, len(train_df)):
+        
+        for i in range(0, len(train_df)):
             if tree.predict(train_df.iloc[i]) == train_df.iloc[i][-1]:
                 correct = correct + 1
             else:

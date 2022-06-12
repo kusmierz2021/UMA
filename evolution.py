@@ -7,7 +7,7 @@ from tqdm import tqdm
 import pickle
 
 
-NAME_BEST_TREE_TO_SAVE = "evolution-satisfaction-20-no-crossing.best.tree.sav"
+NAME_BEST_TREE_TO_SAVE = "evolution-satisfaction-100-real-no-crossing.best.tree.sav"
 
 class Evolution:
     BEST_TREE = None
@@ -103,7 +103,8 @@ class Evolution:
         """
         correct = 0
         incorrect = 0
-        for i in range(0, len(train_df)):
+        for i in range(1000):
+        # for i in range(0, len(train_df)):
             if tree.predict(train_df.iloc[i]) == train_df.iloc[i][-1]:
                 correct = correct + 1
             else:
@@ -183,7 +184,7 @@ class Evolution:
             ## include or exclude different processes by commenting desired line
 
             population = Evolution.tournaments(population_rates)
-            population = Evolution.crossing(population)
+            # population = Evolution.crossing(population)
             population = [Evolution.mutation(x, result_dict) for x in population]
 
             ## END OF EXPERIMENT POSSIBILITIES ##
@@ -223,7 +224,7 @@ if __name__ == "__main__":
         # train_df.to_csv('train.csv', index=False)
         # test_df.to_csv('test.csv', index=False)
 
-    population = Evolution.train(20, population, train_df, result_dict)
+    population = Evolution.train(100, population, train_df, result_dict)
 
     ## we have ability to save last population and start evolution again from that moment
     # pickle.dump(population, open("last_population", 'wb'))

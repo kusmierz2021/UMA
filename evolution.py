@@ -1,11 +1,13 @@
 __author__ = "Rafał Kuśmierz, Michał Podolec"
 
-from Node import *
+from node import *
 from random import randint
 import pandas as pd
 from tqdm import tqdm
 import pickle
 
+
+NAME_BEST_TREE_TO_SAVE = "evolution-satisfaction-20-no-crossing.best.tree.sav"
 
 class Evolution:
     BEST_TREE = None
@@ -155,7 +157,7 @@ class Evolution:
     @staticmethod
     def train(iterations, population, train_df, result_dict):
         """
-
+        make evolution living, while working function saves best tree using NAME_BEST_TREE_TO_SAVE name
         :param iterations: number of iteration of evolution
         :param population: initial population
         :param train_df: training data
@@ -173,7 +175,7 @@ class Evolution:
                 if rate > Evolution.BEST_RATE:
                     Evolution.BEST_RATE = rate
                     Evolution.BEST_TREE = population[i]
-                    pickle.dump(Evolution.BEST_TREE, open("evolution-satisfaction-20-no-crossing.best.tree.sav", 'wb'))
+                    pickle.dump(Evolution.BEST_TREE, open(NAME_BEST_TREE_TO_SAVE, 'wb'))
                 rates_list.append(rate)
             population_rates = list(zip(population, rates_list))
 
@@ -223,4 +225,5 @@ if __name__ == "__main__":
 
     population = Evolution.train(20, population, train_df, result_dict)
 
-
+    ## we have ability to save last population and start evolution again from that moment
+    # pickle.dump(population, open("last_population", 'wb'))

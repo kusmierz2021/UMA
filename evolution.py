@@ -122,7 +122,7 @@ class Evolution:
                 if rate > Evolution.BEST_RATE:
                     Evolution.BEST_RATE = rate
                     Evolution.BEST_TREE = population[i]
-                    pickle.dump(Evolution.BEST_TREE, open("evolution-satisfaction-20-no-crossing.best.tree.sav", 'wb'))
+                    pickle.dump(Evolution.BEST_TREE, open("evolution-satisfaction-random.best.tree.sav", 'wb'))
                 rates_list.append(rate)
             population_rates = list(zip(population, rates_list))
 
@@ -165,6 +165,6 @@ if __name__ == "__main__":
         # train_df.to_csv('train.csv', index=False)
         # test_df.to_csv('test.csv', index=False)
 
-    population = Evolution.train(20, population, train_df, result_dict)
+    population = Evolution.train(1, population, train_df, result_dict)
 
 

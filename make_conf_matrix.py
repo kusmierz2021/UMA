@@ -12,7 +12,7 @@ if __name__ == "__main__":
     ## choose desired validation dataset '.csv'
     test_df = pd.read_csv("airline-passenger-satisfaction/test.csv")
     ## choose desired, already generated tree from '.sav' file
-    best_tree = pickle.load(open("evolution-satisfaction-2500-crossing.best.tree.sav", 'rb'))
+    best_tree = pickle.load(open("airline-passenger-satisfaction/evolution-satisfaction-100-real-no-crossing.best.tree.sav", 'rb'))
 
     proper, predicted = Evolution.fitness_for_conf_mtx(best_tree, test_df)
     conf_matrix = confusion_matrix(proper, predicted)
@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     ax = sns.heatmap(conf_matrix/np.sum(conf_matrix), annot=True, fmt='.2%', cmap='Blues')
 
-    ax.set_title('Airline-satisfaction (TCM)')
+    ax.set_title('Airline-satisfaction (TM)')
     ax.set_xlabel('Predicted Values')
     ax.set_ylabel('Actual Values ')
 

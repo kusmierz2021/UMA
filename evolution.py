@@ -1,6 +1,6 @@
 __author__ = "Rafał Kuśmierz, Michał Podolec"
 
-from node import *
+from Node import *
 from random import randint
 import pandas as pd
 from tqdm import tqdm

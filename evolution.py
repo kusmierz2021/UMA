@@ -1,17 +1,27 @@
 __author__ = "Rafał Kuśmierz, Michał Podolec"
 
-from Node import *
+from node import *
 from random import randint
 import pandas as pd
 from tqdm import tqdm
 import pickle
 
 
+NAME_BEST_TREE_TO_SAVE = "evolution-satisfaction-100-real-no-crossing.best.tree.sav"
+
 class Evolution:
     BEST_TREE = None
     BEST_RATE = None
 
+    @staticmethod
     def cross(tree1, tree2):
+        """
+        Get two trees and cross them at random point
+        :param tree1: first tree to be crossed
+        :param tree2: second tree to be crossed
+        :return:
+        two trees after crossing
+        """
         level = randint(1, 3)
         to_do_1 = "tree1"
         to_do_2 = "tree2"
@@ -32,8 +42,15 @@ class Evolution:
 
         return tree1, tree2
 
-
+    @staticmethod
     def mutation(tree, data_dict):
+        """
+        Get tree and make mutation
+        :param tree: tree to be mutate
+        :param data_dict: dictionary - key = column_name, value = set of values in column - needed to random rule and its value
+        :return:
+        modified tree
+        """
         for mut in range(5):
             level = randint(0, 6)
             to_do = "tree"
@@ -53,6 +70,14 @@ class Evolution:
 
     @staticmethod
     def fitness_for_conf_mtx(tree, train_df):
+        """
+        Calculate the ratio of good predictions
+        :param tree: tree to be grade
+        :param train_df: testing data if final grade calculated
+        :return:
+        proper: list of proper classes
+        predicted: list of predicted classes
+        """
         correct = 0
         incorrect = 0
         predicted = []
@@ -69,9 +94,17 @@ class Evolution:
 
     @staticmethod
     def fitness(tree, train_df):
+        """
+        Calculate the ratio of good predictions
+        :param tree: tree to be grade
+        :param train_df: training data
+        :return:
+        grade: the ratio of good predictions
+        """
         correct = 0
         incorrect = 0
-        for i in range(0, len(train_df)):
+        for i in range(1000):
+        # for i in range(0, len(train_df)):
             if tree.predict(train_df.iloc[i]) == train_df.iloc[i][-1]:
                 correct = correct + 1
             else:
@@ -80,6 +113,12 @@ class Evolution:
         return grade
 
     def tournaments(population_rates, size=3):
+        """
+        Tournament selection
+        :param size: amount of trees to take part in single tournament, default 3
+        :return:
+        next generation of population
+        """
         new_population = []
         while True:
             tournament = []
@@ -98,6 +137,12 @@ class Evolution:
 
     @staticmethod
     def crossing(population):
+        """
+        Get population and make crossing
+        :param population: population to be crossed
+        :return:
+        population after crossing
+        """
         population_after_crossing = []
         for i in range(10):
             t1 = randint(0, len(population)-1)
@@ -112,6 +157,15 @@ class Evolution:
 
     @staticmethod
     def train(iterations, population, train_df, result_dict):
+        """
+        make evolution living, while working function saves best tree using NAME_BEST_TREE_TO_SAVE name
+        :param iterations: number of iteration of evolution
+        :param population: initial population
+        :param train_df: training data
+        :param result_dict: dictionary - key = column_name, value = set of values in column - needed to random rule and its value
+        :return:
+        final population
+        """
         if Evolution.BEST_TREE is None:
             Evolution.BEST_TREE = population[0]
             Evolution.BEST_RATE = Evolution.fitness(Evolution.BEST_TREE, train_df)
@@ -122,7 +176,7 @@ class Evolution:
                 if rate > Evolution.BEST_RATE:
                     Evolution.BEST_RATE = rate
                     Evolution.BEST_TREE = population[i]
-                    pickle.dump(Evolution.BEST_TREE, open("evolution-satisfaction-random.best.tree.sav", 'wb'))
+                    pickle.dump(Evolution.BEST_TREE, open(NAME_BEST_TREE_TO_SAVE, 'wb'))
                 rates_list.append(rate)
             population_rates = list(zip(population, rates_list))
 
@@ -130,7 +184,7 @@ class Evolution:
             ## include or exclude different processes by commenting desired line
 
             population = Evolution.tournaments(population_rates)
-            population = Evolution.crossing(population)
+            # population = Evolution.crossing(population)
             population = [Evolution.mutation(x, result_dict) for x in population]
 
             ## END OF EXPERIMENT POSSIBILITIES ##
@@ -144,18 +198,23 @@ class Evolution:
 if __name__ == "__main__":
 
     df = pd.read_csv("airline-passenger-satisfaction/train.csv")
+
     ## two lines for deleting unnecessary columns if needed
     df.drop("Unnamed: 0", inplace=True, axis=1)
     df = df.drop("id", axis=1)
     ##
 
+    ## get classes and values for each column
     result_dict, classes = Node.create_dictionary_from_df(df)
 
     ## init population if yet not exist
-        # population = Node.get_init_population(20, result_dict, classes)
-        # pickle.dump(population, open("population.sav", 'wb'))
+    population = Node.get_init_population(20, result_dict, classes)
 
-    population = pickle.load(open("populations/population.sav", 'rb'))
+    ## to save created population
+    # pickle.dump(population, open("population.sav", 'wb'))
+
+    ## to load already created population
+    # population = pickle.load(open("populations/population.sav", 'rb'))
     train_df = pd.read_csv("airline-passenger-satisfaction/train.csv")
     train_df.drop("Unnamed: 0", inplace=True, axis=1)
     train_df = train_df.drop("id", axis=1)
@@ -165,6 +224,7 @@ if __name__ == "__main__":
         # train_df.to_csv('train.csv', index=False)
         # test_df.to_csv('test.csv', index=False)
 
-    population = Evolution.train(1, population, train_df, result_dict)
+    population = Evolution.train(100, population, train_df, result_dict)
 
-
+    ## we have ability to save last population and start evolution again from that moment
+    # pickle.dump(population, open("last_population", 'wb'))

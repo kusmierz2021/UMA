@@ -16,8 +16,16 @@ class Node:
 
 
     def __init__(self, data_dict, classes, depth=None, max_depth=4):
+        """
+        Inits a tree
+        :param data_dict: dictionary - key = column_name, value = set of values in column - needed to random rule and its value
+        :param classes: classes to be predicted
+        :param depth: depth of node in current tree
+        :param max_depth: pax depth of tree
+        """
         self.depth = depth if depth else 0
 
+        ## enable random classes, not
         # probability of being leaf
 
         # x = r.randint(0, 10)
@@ -40,12 +48,24 @@ class Node:
 
     @staticmethod
     def get_random_class(classes):
+        """
+
+        :param classes: classes to be predicted
+        :return:
+        random class
+        """
         x = Node.CLASS_NUMBER % len(classes)
         Node.CLASS_NUMBER = Node.CLASS_NUMBER + 1
         return classes[x]
 
     @staticmethod
     def get_random_rule(data_dict):
+        """
+        get random rule and value to comparison
+        :param data_dict: dictionary - key = column_name, value = set of values in column - needed to random rule and its value
+        :return:
+        random rule and value
+        """
         x = r.randint(0, len(list(data_dict.keys())) - 1)
         key = list(data_dict.keys())[x]
         rule = key
@@ -53,20 +73,11 @@ class Node:
         value = data_dict[key][x]
         return rule, value
 
-    # def get_rule(self, data_dict, classes, probability=30):
-    #     x = r.randint(1, 100)
-    #     if ((x <= 2 or self.depth == max_depth) and self.depth != 0):
-    #         x = r.randint(0, len(classes) - 1)
-    #         self.value = classes[x]
-    #         self.rule = "leaf"
-    #         self.left = None
-    #         self.right = None
-    #         self.print_in = self.depth * 4 * "-" + self.rule + ": " + self.value
-    #         return
 
     def print_info(self, width=4):
         """
-        Method to print the infromation about the tree
+        used by print_tree
+        :param width: width of indentation for every next node
         """
         # Defining the number of spaces
         # const = int(self.depth * width ** 1.5)
@@ -81,7 +92,7 @@ class Node:
 
     def print_tree(self):
         """
-        Prints the whole tree from the current node to the bottom
+        Print tree
         """
         self.print_info()
 
@@ -92,6 +103,12 @@ class Node:
             self.right.print_tree()
 
     def predict(self, row_dict):
+        """
+        predicts class for given data row
+        :param row_dict: row of dataset to predict class
+        :return:
+        predicted class
+        """
         # print_in = self.depth * 4 * "-" + self.rule + " <= " + str(self.value) + '\n'
         # print(print_in)
         if self.rule == "leaf":
@@ -105,6 +122,14 @@ class Node:
 
     @staticmethod
     def get_init_population(size, result_dict, classes):
+        """
+        Get init random population
+        :param size: size of population
+        :param result_dict: dictionary - key = column_name, value = set of values in column - needed to random rule and its value
+        :param classes: classes to be predicted
+        :return:
+        list of individuals
+        """
         initial_population = []
         for i in range(size):
             initial_population.append(Node(result_dict, classes))
@@ -112,6 +137,12 @@ class Node:
 
     @staticmethod
     def create_dictionary_from_df(train_df):
+        """
+
+        :param train_df: training dataset
+        :return:
+        dictionary - key = column_name, value = set of values in column - needed to random rule and its value
+        """
         result_dict = {}
         rules_list = train_df.columns.tolist()
 
